@@ -1,0 +1,3 @@
+CGPA must match the official transcript exactly.
+No upward rounding of grades is allowed.
+All internships must be verified by the placement office.
