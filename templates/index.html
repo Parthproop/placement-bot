@@ -21,12 +21,19 @@
 function sendMessage() {
     let input = document.getElementById("user-input");
     let message = input.value.trim();
-
     if (!message) return;
 
     let chatBox = document.getElementById("chat-box");
 
     chatBox.innerHTML += `<div class="user"><strong>You:</strong> ${message}</div>`;
+
+    // Show loading message
+    let loadingDiv = document.createElement("div");
+    loadingDiv.className = "bot";
+    loadingDiv.id = "loading";
+    loadingDiv.innerHTML = "<strong>Bot:</strong> Typing...";
+    chatBox.appendChild(loadingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
     fetch("/chat", {
         method: "POST",
@@ -35,12 +42,22 @@ function sendMessage() {
     })
     .then(res => res.json())
     .then(data => {
+        document.getElementById("loading").remove();
         chatBox.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.response}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
     });
 
     input.value = "";
+    
 }
+
+document.getElementById("user-input")
+.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+})
 </script>
 
 </body>

@@ -8,20 +8,31 @@ app = Flask(__name__)
 # CONFIG
 # ==============================
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
-MODEL_NAME = "mistral"   # change if needed
+MODEL_NAME = "phi3:mini"   # change if needed
 TIMEOUT = 120
 
 
 # ==============================
 # LOAD KNOWLEDGE BASE
 # ==============================
+KNOWLEDGE_BASE = ""
+
 def load_documents():
-    files = [
-        "faq.txt",
-        "policy.txt",
-        "rulebook.txt",
-        "edge_cases.txt"
-    ]
+    global KNOWLEDGE_BASE
+
+    if KNOWLEDGE_BASE:
+        return KNOWLEDGE_BASE
+
+    files = ["faq.txt", "policy.txt", "rulebook.txt", "edge_cases.txt"]
+
+    combined = ""
+    for file in files:
+        if os.path.exists(file):
+            with open(file, "r", encoding="utf-8") as f:
+                combined += f.read() + "\n\n"
+
+    KNOWLEDGE_BASE = combined
+    return KNOWLEDGE_BASE
 
     combined = ""
 
