@@ -1,2 +1,14 @@
-If a startup is unregistered and cannot provide incorporation documents, the experience will be treated as a project instead of an internship.
-If internship duration is less than 4 weeks, it may not be considered valid.
+CASE: Student has 1 backlog cleared recently.
+Resolution: Allowed if backlog is officially cleared before application deadline.
+
+CASE: Student absent due to medical emergency.
+Resolution: Medical certificate required within 48 hours.
+
+CASE: Student selected in two companies same day.
+Resolution: Student must choose one within 24 hours.
+
+CASE: Company postpones joining date.
+Resolution: Placement cell decision will be final.
+
+CASE: Student caught cheating in coding round.
+Resolution: Immediate disqualification for the academic year.

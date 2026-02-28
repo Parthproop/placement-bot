@@ -1,4 +1,11 @@
-Students must upload offer letter and completion certificate.
-Internships without official documentation will not be accepted.
-Minimum CGPA required for Phase 1 placements is 7.0.
-Students with active backlogs are not allowed to sit for placements.
+Q: What is the minimum CGPA required for placements?
+A: The minimum CGPA required is 6.5 for most companies. Some premium companies require 7.5 or above.
+
+Q: Can students with backlogs sit for placements?
+A: Students must have zero active backlogs at the time of company registration.
+
+Q: Is attendance mandatory for placement training?
+A: Yes, minimum 75% attendance in placement training sessions is compulsory.
+
+Q: Can MBA students participate in tech placements?
+A: No, MBA students are only eligible for management roles.

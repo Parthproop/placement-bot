@@ -1,42 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Placement Bot</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>University Placement Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="chat-container">
-        <h2>Placement Office Assistant</h2>
 
-        <div id="chat-box"></div>
+<div class="container">
+    <h1>University Placement Cell Assistant</h1>
 
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask your question here...">
-            <button onclick="sendMessage()">Send</button>
-        </div>
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Ask your placement question..." />
+        <button onclick="sendMessage()">Send</button>
     </div>
+</div>
 
 <script>
 function sendMessage() {
-    const input = document.getElementById("user-input");
-    const message = input.value;
+    let input = document.getElementById("user-input");
+    let message = input.value.trim();
 
     if (!message) return;
 
-    const chatBox = document.getElementById("chat-box");
+    let chatBox = document.getElementById("chat-box");
 
-    chatBox.innerHTML += `<div class="user-msg">You: ${message}</div>`;
+    chatBox.innerHTML += `<div class="user"><strong>You:</strong> ${message}</div>`;
 
     fetch("/chat", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: message })
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
-        chatBox.innerHTML += `<div class="bot-msg">Bot: ${data.response}</div>`;
+        chatBox.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.response}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
     });
 

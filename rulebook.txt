@@ -1,3 +1,8 @@
-CGPA must match the official transcript exactly.
-No upward rounding of grades is allowed.
-All internships must be verified by the placement office.
+RULE 1: Students must register before the deadline.
+RULE 2: Late registrations are not accepted.
+RULE 3: Students must wear formal attire for interviews.
+RULE 4: Technical test cheating leads to suspension.
+RULE 5: Only final-year students can participate.
+RULE 6: Students must update resumes on the portal.
+RULE 7: Maximum 3 active applications allowed at a time.
+RULE 8: Internship PPO holders are exempt from certain rules.
