@@ -1,41 +1,75 @@
-from flask import Flask, render_template, request, jsonify
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from flask import Flask, render_template, request
+import requests
 
 app = Flask(__name__)
 
-# Load knowledge files
-def load_knowledge():
-    texts = []
-    for file in ["rulebook.txt", "faq.txt", "edge_cases.txt"]:
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
+MODEL_NAME = "mistral"
+
+
+def load_documents():
+    files = ["faq.txt", "policy.txt", "edge_cases.txt"]
+    combined_text = ""
+
+    for file in files:
         try:
             with open(file, "r", encoding="utf-8") as f:
-                texts.extend(f.readlines())
+                combined_text += f.read() + "\n"
         except:
             pass
-    return texts
 
-knowledge_base = load_knowledge()
+    return combined_text
 
-vectorizer = TfidfVectorizer()
-vectors = vectorizer.fit_transform(knowledge_base)
+
+def generate_ai_response(user_question):
+
+    context = load_documents()
+
+    prompt = f"""
+You are an official Placement Cell Assistant.
+
+Answer ONLY using the provided context below.
+If the answer is not found in context, say:
+"This case needs to be reviewed by the placement team."
+
+Context:
+{context}
+
+Question:
+{user_question}
+"""
+
+    response = requests.post(
+        OLLAMA_URL,
+        json={
+            "model": MODEL_NAME,
+            "prompt": prompt,
+            "stream": False
+        }
+    )
+
+    return response.json()["response"]
+
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
+
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json["message"]
+    data = request.get_json()
+    user_input = data.get("message")
 
-    user_vector = vectorizer.transform([user_input])
-    similarities = cosine_similarity(user_vector, vectors)
-    best_match_index = similarities.argmax()
+    if not user_input:
+        return {"response": "No message received."}
 
-    if similarities[0][best_match_index] < 0.2:
-        return jsonify({"response": "I am not sure about that. Please contact the placement office."})
+    try:
+        ai_response = generate_ai_response(user_input)
+        return {"response": ai_response}
+    except Exception as e:
+        return {"response": f"Error: {str(e)}"}
 
-    return jsonify({"response": knowledge_base[best_match_index]})
 
 if __name__ == "__main__":
     app.run(debug=True)
