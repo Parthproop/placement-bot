@@ -4,75 +4,88 @@ import os
 
 app = Flask(__name__)
 
-# ==============================
-# CONFIG
-# ==============================
+# ======================================
+# CONFIGURATION
+# ======================================
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
-MODEL_NAME = "phi3:mini"   # change if needed
-TIMEOUT = 120
+MODEL_NAME = "phi3:mini"   # Faster than mistral
+TIMEOUT = 60
 
 
-# ==============================
-# LOAD KNOWLEDGE BASE
-# ==============================
-KNOWLEDGE_BASE = ""
+# ======================================
+# LOAD KNOWLEDGE BASE ONCE (FAST)
+# ======================================
+def load_knowledge():
+    files = [
+        "faq.txt",
+        "policy.txt",
+        "rulebook.txt",
+        "edge_cases.txt"
+    ]
 
-def load_documents():
-    global KNOWLEDGE_BASE
+    combined_text = ""
 
-    if KNOWLEDGE_BASE:
-        return KNOWLEDGE_BASE
+    print("[INFO] Loading knowledge base...")
 
-    files = ["faq.txt", "policy.txt", "rulebook.txt", "edge_cases.txt"]
-
-    combined = ""
     for file in files:
         if os.path.exists(file):
             with open(file, "r", encoding="utf-8") as f:
-                combined += f.read() + "\n\n"
+                combined_text += f"\n\n===== {file.upper()} =====\n"
+                combined_text += f.read()
+        else:
+            print(f"[WARNING] {file} not found.")
 
-    KNOWLEDGE_BASE = combined
-    return KNOWLEDGE_BASE
-
-    combined = ""
-
-    for file in files:
-        try:
-            if os.path.exists(file):
-                with open(file, "r", encoding="utf-8") as f:
-                    combined += f"\n\n===== {file.upper()} =====\n"
-                    combined += f.read()
-            else:
-                print(f"[WARNING] {file} not found.")
-        except Exception as e:
-            print(f"[ERROR] Loading {file} failed:", e)
-
-    return combined
+    print("[INFO] Knowledge base loaded successfully.")
+    return combined_text
 
 
-# ==============================
-# AI RESPONSE
-# ==============================
+# Load once at startup
+KNOWLEDGE_BASE = load_knowledge()
+
+
+# ======================================
+# SIMPLE CONTEXT FILTERING (FASTER)
+# ======================================
+def get_relevant_context(question):
+    question_words = question.lower().split()
+    lines = KNOWLEDGE_BASE.split("\n")
+
+    relevant_lines = []
+
+    for line in lines:
+        line_lower = line.lower()
+        if any(word in line_lower for word in question_words):
+            relevant_lines.append(line)
+
+    # Limit size to avoid huge prompt
+    return "\n".join(relevant_lines[:40])
+
+
+# ======================================
+# GENERATE RESPONSE
+# ======================================
 def generate_response(question):
 
-    context = load_documents()
+    context = get_relevant_context(question)
+
+    if not context.strip():
+        context = "No exact match found in rulebook."
 
     prompt = f"""
-You are the Official University Placement Cell Assistant.
+You are the Official University Placement and Internship Assistant.
 
-IMPORTANT RULES:
-1. Answer ONLY using the provided context.
-2. Do NOT hallucinate.
-3. If the answer is not in context, say:
-   "This case needs to be reviewed by the placement team."
+Rules:
+- Answer ONLY using the context provided.
+- If answer not found, say:
+"This case needs to be reviewed by the placement team."
 
-CONTEXT:
+Context:
 {context}
 
-STUDENT QUESTION:
+Student Question:
 {question}
 
-FINAL ANSWER:
+Answer:
 """
 
     try:
@@ -87,14 +100,14 @@ FINAL ANSWER:
         )
 
         if response.status_code != 200:
-            return "Error: AI model is not responding properly."
+            return "Error: AI model not responding properly."
 
         data = response.json()
 
-        return data.get("response", "No response received.").strip()
+        return data.get("response", "No response from model.").strip()
 
     except requests.exceptions.ConnectionError:
-        return "Error: Cannot connect to Ollama. Is 'ollama serve' running?"
+        return "Error: Cannot connect to Ollama. Make sure 'ollama serve' is running."
 
     except requests.exceptions.Timeout:
         return "Error: AI response timed out."
@@ -103,9 +116,9 @@ FINAL ANSWER:
         return f"Server Error: {str(e)}"
 
 
-# ==============================
+# ======================================
 # ROUTES
-# ==============================
+# ======================================
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -124,6 +137,12 @@ def chat():
     return jsonify({"response": reply})
 
 
+# ======================================
+# RUN SERVER
+# ======================================
 if __name__ == "__main__":
-    print("Starting Placement Bot...")
+    print("=================================")
+    print(" Placement Bot Running...")
+    print(" Using Model:", MODEL_NAME)
+    print("=================================")
     app.run(debug=True)
